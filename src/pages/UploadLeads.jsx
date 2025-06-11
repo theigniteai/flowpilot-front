@@ -1,10 +1,11 @@
-// src/pages/UploadLeads.jsx
+// UploadLeads.jsx
 import React, { useState } from "react";
 import Papa from "papaparse";
 
 const UploadLeads = () => {
   const [csvData, setCsvData] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -12,51 +13,49 @@ const UploadLeads = () => {
       header: true,
       complete: (result) => {
         setCsvData(result.data);
-        setMessage(`${result.data.length} leads parsed successfully.`);
-        // Optionally send to backend here via fetch/axios
+        setMessage(`${result.data.length} leads parsed. Now click Submit.`);
       },
     });
+  };
+
+  const handleSubmit = async () => {
+    if (!csvData.length) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch("https://flowpilot-backend-z59q.onrender.com/api/leads/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leads: csvData }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage(`${data.inserted} leads uploaded successfully.`);
+      } else {
+        setMessage("Upload failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Error uploading leads.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Upload Leads</h2>
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
-        className="mb-4"
-      />
-      {message && (
-        <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
-          {message}
-        </div>
-      )}
+      <input type="file" accept=".csv" onChange={handleFileUpload} />
       {csvData.length > 0 && (
-        <div className="overflow-auto max-h-96">
-          <table className="w-full bg-white rounded shadow">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                {Object.keys(csvData[0]).map((key) => (
-                  <th key={key} className="p-2 border-b">{key}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {csvData.slice(0, 10).map((row, i) => (
-                <tr key={i} className="border-t">
-                  {Object.values(row).map((val, j) => (
-                    <td key={j} className="p-2 border-b">{val}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-sm text-gray-500 mt-2">
-            Showing first 10 of {csvData.length} rows.
-          </p>
-        </div>
+        <button
+          onClick={handleSubmit}
+          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+        >
+          {loading ? "Submitting..." : "Submit to Backend"}
+        </button>
       )}
+      {message && <p className="mt-4 text-green-700">{message}</p>}
     </div>
   );
 };
