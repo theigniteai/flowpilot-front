@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import UploadLeads from "./pages/UploadLeads";
 import ConnectFacebook from "./pages/ConnectFacebook";
+import LeadsDashboard from "./pages/LeadsDashboard"; // 👈 import added
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/upload" element={<UploadLeads />} />
             <Route path="/facebook" element={<ConnectFacebook />} />
+            <Route path="/leads" element={<LeadsDashboard />} /> {/* 👈 new route */}
           </Routes>
         </div>
       </div>
