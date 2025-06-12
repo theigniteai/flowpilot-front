@@ -9,6 +9,7 @@ const Sidebar = () => {
   const menu = [
     { name: "Dashboard", path: "/" },
     { name: "Upload Leads", path: "/upload" },
+    { name: "Manage Leads", path: "/leads" }, // ✅ added
     { name: "Connect Facebook", path: "/facebook" },
   ];
 
